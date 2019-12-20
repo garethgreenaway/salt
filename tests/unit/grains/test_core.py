@@ -39,6 +39,7 @@ import salt.grains.core as core
 # Import 3rd-party libs
 from salt.ext import six
 from salt._compat import ipaddress
+from salt.ext.six.moves import range
 
 log = logging.getLogger(__name__)
 
@@ -1432,3 +1433,31 @@ class CoreGrainsTestCase(TestCase, LoaderModuleMockMixin):
 
             self.assertIn('virtual', osdata_grains)
             self.assertNotEqual(osdata_grains['virtual'], 'physical')
+
+    @skipIf(not salt.utils.platform.is_linux(), 'System is not Linux')
+    def test_linux_cpu_data_num_cpus(self):
+        cpuinfo_list = []
+        for i in range(1, 20, 2):
+            cpuinfo_dict = {'processor': i,
+                            'cpu_family': 6,
+                            'model_name': 'Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz',
+                            'flags': 'fpu vme de pse tsc msr pae mce cx8 apic sep mtrr'
+                            }
+            cpuinfo_list.append(cpuinfo_dict)
+
+        
+        cpuinfo_content = ''
+        for item in cpuinfo_list:
+            cpuinfo_content += ('processor: {0}\n'
+                                'cpu family: {1}\n'
+                                'model name: {2}\n'
+                                'flags: {3}\n\n').format(item['processor'],
+                                                         item['cpu_family'],
+                                                         item['model_name'],
+                                                         item['flags'])
+
+        with patch.object(os.path, 'isfile', MagicMock(return_value=True)), \
+            patch("salt.utils.files.fopen", mock_open(read_data=cpuinfo_content)):
+                ret = core._linux_cpudata()
+                self.assertIn('num_cpus', ret)
+                self.assertEqual(len(cpuinfo_list), ret['num_cpus'])

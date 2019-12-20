@@ -152,6 +152,7 @@ def _linux_cpudata():
                 key = comps[0].strip()
                 val = comps[1].strip()
                 if key == 'processor':
+                    log.debug('=== processor %s %s ===', key, val)
                     grains['num_cpus'] += 1
                 elif key == 'model name':
                     grains['cpu_model'] = val

@@ -14,7 +14,9 @@ of the Salt system each have a respective configuration file. The
     :ref:`Example master configuration file <configuration-examples-master>`.
 
 The configuration file for the salt-master is located at ``/etc/salt/master``
-by default. A notable exception is FreeBSD, where the configuration file is
+by default. Atomic included configuration files can be placed in 
+``/etc/salt/master.d/*.conf``. Warning: files with other suffixes than .conf will 
+not be included. A notable exception is FreeBSD, where the configuration file is
 located at ``/usr/local/etc/salt``. The available options are as follows:
 
 
@@ -4254,6 +4256,21 @@ explanation <git-pillar-multiple-remotes>` from the git_pillar documentation.
 .. code-block:: yaml
 
     git_pillar_includes: False
+
+``git_pillar_update_interval``
+******************************
+
+.. versionadded:: neon
+
+Default: ``60``
+
+This option defines the default update interval (in seconds) for git_pillar
+remotes. The update is handled within the global loop, hence
+``git_pillar_update_interval`` should be a multiple of ``loop_interval``.
+
+.. code-block:: yaml
+
+    git_pillar_update_interval: 120
 
 .. _git-ext-pillar-auth-opts:
 

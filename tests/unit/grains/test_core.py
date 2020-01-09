@@ -1442,8 +1442,6 @@ class CoreGrainsTestCase(TestCase, LoaderModuleMockMixin):
                             'flags': 'fpu vme de pse tsc msr pae mce cx8 apic sep mtrr'
                             }
             cpuinfo_list.append(cpuinfo_dict)
-
-        
         cpuinfo_content = ''
         for item in cpuinfo_list:
             cpuinfo_content += ('processor: {0}\n'
@@ -1455,10 +1453,10 @@ class CoreGrainsTestCase(TestCase, LoaderModuleMockMixin):
                                                          item['flags'])
 
         with patch.object(os.path, 'isfile', MagicMock(return_value=True)), \
-            patch("salt.utils.files.fopen", mock_open(read_data=cpuinfo_content)):
-                ret = core._linux_cpudata()
-                self.assertIn('num_cpus', ret)
-                self.assertEqual(len(cpuinfo_list), ret['num_cpus'])
+                patch("salt.utils.files.fopen", mock_open(read_data=cpuinfo_content)):
+            ret = core._linux_cpudata()
+            self.assertIn('num_cpus', ret)
+            self.assertEqual(len(cpuinfo_list), ret['num_cpus'])
 
     @skipIf(salt.utils.platform.is_windows(), 'System is Windows')
     def test_bsd_osfullname(self):

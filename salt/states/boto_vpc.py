@@ -1861,10 +1861,20 @@ def accept_vpc_peering_connection(
 
 
 # pylint: disable=too-many-arguments
-def request_vpc_peering_connection(name, requester_vpc_id=None, requester_vpc_name=None,
-                                   peer_vpc_id=None, peer_vpc_name=None, conn_name=None,
-                                   peer_owner_id=None, peer_region=None, region=None,
-                                   key=None, keyid=None, profile=None):
+def request_vpc_peering_connection(
+    name,
+    requester_vpc_id=None,
+    requester_vpc_name=None,
+    peer_vpc_id=None,
+    peer_vpc_name=None,
+    conn_name=None,
+    peer_owner_id=None,
+    peer_region=None,
+    region=None,
+    key=None,
+    keyid=None,
+    profile=None,
+):
     """
     name
         Name of the state
@@ -1964,11 +1974,21 @@ def request_vpc_peering_connection(name, requester_vpc_id=None, requester_vpc_na
     return ret
 
 
-def vpc_peering_connection_present(name, requester_vpc_id=None, requester_vpc_name=None,
-                                   peer_vpc_id=None, peer_vpc_name=None, conn_name=None,
-                                   peer_owner_id=None, peer_region=None, region=None,
-                                   key=None, keyid=None, profile=None):
-    '''
+def vpc_peering_connection_present(
+    name,
+    requester_vpc_id=None,
+    requester_vpc_name=None,
+    peer_vpc_id=None,
+    peer_vpc_name=None,
+    conn_name=None,
+    peer_owner_id=None,
+    peer_region=None,
+    region=None,
+    key=None,
+    keyid=None,
+    profile=None,
+):
+    """
     name
         Name of the state
 
@@ -2047,15 +2067,28 @@ def vpc_peering_connection_present(name, requester_vpc_id=None, requester_vpc_na
             )
             log.info(ret["comment"])
             return ret
-        return accept_vpc_peering_connection(name=name, conn_name=conn_name,
-                                             region=region, key=key, keyid=keyid,
-                                             profile=profile)
-    return request_vpc_peering_connection(name=name, requester_vpc_id=requester_vpc_id,
-                                          requester_vpc_name=requester_vpc_name,
-                                          peer_vpc_id=peer_vpc_id, peer_vpc_name=peer_vpc_name,
-                                          conn_name=conn_name, peer_owner_id=peer_owner_id,
-                                          peer_region=peer_region, region=region, key=key,
-                                          keyid=keyid, profile=profile)
+        return accept_vpc_peering_connection(
+            name=name,
+            conn_name=conn_name,
+            region=region,
+            key=key,
+            keyid=keyid,
+            profile=profile,
+        )
+    return request_vpc_peering_connection(
+        name=name,
+        requester_vpc_id=requester_vpc_id,
+        requester_vpc_name=requester_vpc_name,
+        peer_vpc_id=peer_vpc_id,
+        peer_vpc_name=peer_vpc_name,
+        conn_name=conn_name,
+        peer_owner_id=peer_owner_id,
+        peer_region=peer_region,
+        region=region,
+        key=key,
+        keyid=keyid,
+        profile=profile,
+    )
 
 
 def vpc_peering_connection_absent(

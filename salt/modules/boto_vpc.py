@@ -3706,11 +3706,21 @@ def _get_subnet_explicit_route_table(
     return None
 
 
-def request_vpc_peering_connection(requester_vpc_id=None, requester_vpc_name=None,
-                                   peer_vpc_id=None, peer_vpc_name=None, name=None,
-                                   peer_owner_id=None, peer_region=None, region=None,
-                                   key=None, keyid=None, profile=None, dry_run=False):
-    '''
+def request_vpc_peering_connection(
+    requester_vpc_id=None,
+    requester_vpc_name=None,
+    peer_vpc_id=None,
+    peer_vpc_name=None,
+    name=None,
+    peer_owner_id=None,
+    peer_region=None,
+    region=None,
+    key=None,
+    keyid=None,
+    profile=None,
+    dry_run=False,
+):
+    """
     Request a VPC peering connection between two VPCs.
 
     .. versionadded:: 2016.11.0
@@ -3809,7 +3819,11 @@ def request_vpc_peering_connection(requester_vpc_id=None, requester_vpc_name=Non
                 "error": "Could not resolve VPC name {0} to an ID".format(peer_vpc_name)
             }
 
-    peering_params = {"VpcId": requester_vpc_id, "PeerVpcId": peer_vpc_id, "DryRun": dry_run}
+    peering_params = {
+        "VpcId": requester_vpc_id,
+        "PeerVpcId": peer_vpc_id,
+        "DryRun": dry_run,
+    }
 
     if peer_owner_id:
         peering_params.update({"PeerOwnerId": peer_owner_id})
@@ -3817,11 +3831,11 @@ def request_vpc_peering_connection(requester_vpc_id=None, requester_vpc_name=Non
         peering_params.update({"PeerRegion": peer_region})
 
     try:
-        log.debug('Trying to request vpc peering connection')
+        log.debug("Trying to request vpc peering connection")
         vpc_peering = conn.create_vpc_peering_connection(**peering_params)
-        peering = vpc_peering.get('VpcPeeringConnection', {})
-        peering_conn_id = peering.get('VpcPeeringConnectionId', 'ERROR')
-        msg = 'VPC peering {0} requested.'.format(peering_conn_id)
+        peering = vpc_peering.get("VpcPeeringConnection", {})
+        peering_conn_id = peering.get("VpcPeeringConnectionId", "ERROR")
+        msg = "VPC peering {0} requested.".format(peering_conn_id)
         log.debug(msg)
 
         if name:

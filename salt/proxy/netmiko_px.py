@@ -244,7 +244,7 @@ def init(opts):
 
     netmiko_device['always_alive'] = netmiko_connection_args.pop('always_alive',
                                                                  opts.get('proxy_always_alive', True))
-    if not proxy_dict.get('skip_connect_on_init', False):
+    if not proxy_dict.get('skip_connect_on_init', True):
         try:
             connection = ConnectHandler(**netmiko_connection_args)
             netmiko_device['connection'] = connection

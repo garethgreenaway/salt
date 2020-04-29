@@ -244,22 +244,18 @@ def init(opts):
 
     netmiko_device['always_alive'] = netmiko_connection_args.pop('always_alive',
                                                                  opts.get('proxy_always_alive', True))
-    if not proxy_dict.get('skip_connect_on_init', True):
-        try:
-            connection = ConnectHandler(**netmiko_connection_args)
-            netmiko_device['connection'] = connection
-            netmiko_device['initialized'] = True
-            netmiko_device['args'] = netmiko_connection_args
-            netmiko_device['up'] = True
-            if not netmiko_device['always_alive']:
-                netmiko_device['connection'].disconnect()
-        except NetMikoTimeoutException as t_err:
-            log.error('Unable to setup the netmiko connection', exc_info=True)
-        except NetMikoAuthenticationException as au_err:
-            log.error('Unable to setup the netmiko connection', exc_info=True)
-    else:
+    try:
+        connection = ConnectHandler(**netmiko_connection_args)
+        netmiko_device['connection'] = connection
+        netmiko_device['initialized'] = True
+        netmiko_device['args'] = netmiko_connection_args
         netmiko_device['up'] = True
-        netmiko_device['initialized'] = False
+        if not netmiko_device['always_alive']:
+            netmiko_device['connection'].disconnect()
+    except NetMikoTimeoutException as t_err:
+        log.error('Unable to setup the netmiko connection', exc_info=True)
+    except NetMikoAuthenticationException as au_err:
+        log.error('Unable to setup the netmiko connection', exc_info=True)
     return True
 
 

@@ -8,12 +8,15 @@ modules.
 from __future__ import absolute_import, print_function, unicode_literals
 
 # Import python libs
+import logging
 import random
 
 # Import salt libs
 import salt.loader
 from salt.ext.six import string_types
 from salt.ext.six.moves import range
+
+log = logging.getLogger(__name__)
 
 
 def sdb_get(uri, opts, utils=None):

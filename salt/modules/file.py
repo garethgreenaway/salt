@@ -2923,7 +2923,9 @@ def blockreplace(
     # no changes are required and to avoid any file access on a partially
     # written file.
     try:
-        with salt.utils.fopen(path, mode="r", encoding=file_encoding, newline="") as f:
+        with salt.utils.files.fopen(
+            path, mode="r", encoding=file_encoding, newline=""
+        ) as f:
             for line in f:
                 write_line_to_new_file = True
 

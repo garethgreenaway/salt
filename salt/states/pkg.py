@@ -2723,6 +2723,7 @@ def latest(
                 "The following packages would be installed/upgraded: "
                 + ", ".join(sorted(targets))
             )
+            changes = {x: {"new": "installed", "old": ""} for x in sorted(targets)}
             if up_to_date:
                 up_to_date_count = len(up_to_date)
                 if up_to_date_count <= 10:
@@ -2739,7 +2740,7 @@ def latest(
 
             return {
                 "name": name,
-                "changes": {},
+                "changes": changes,
                 "result": None,
                 "comment": "\n".join(comments),
             }

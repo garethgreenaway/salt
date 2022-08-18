@@ -552,6 +552,58 @@ def test_installed_with_changes_test_true(list_pkgs):
             assert ret["changes"] == expected
 
 
+def test_latest_with_changes_test_true(pkgs):
+    """
+    Test pkg.latest with simulated changes
+    """
+
+    def mock_pkg_version(*names, **kwargs):
+        _pkgs = {}
+        for name in names:
+            _pkgs[name] = pkgs[name]["old"]
+        return _pkgs
+
+    latest_version = MagicMock(
+        return_value={pkgname: pkgver["new"] for pkgname, pkgver in pkgs.items()}
+    )
+
+    with patch.dict(
+        pkg.__salt__,
+        {
+            "pkg.latest_version": latest_version,
+            "pkg.version": mock_pkg_version,
+        },
+    ):
+        with patch.dict(
+            pkg.__opts__,
+            {"test": True},
+        ):
+            expected = {"pkga": {"new": "installed", "old": ""}}
+            ret = pkg.latest("pkga", test=True)
+            assert ret["result"] is None
+            assert ret["changes"] == expected
+
+    with patch.dict(
+        pkg.__salt__,
+        {
+            "pkg.latest_version": latest_version,
+            "pkg.version": mock_pkg_version,
+        },
+    ):
+        with patch.dict(
+            pkg.__opts__,
+            {"test": True},
+        ):
+            expected = {
+                "pkga": {"new": "installed", "old": ""},
+                "pkgb": {"new": "installed", "old": ""},
+                "pkgc": {"new": "installed", "old": ""},
+            }
+            ret = pkg.latest(name="all_pkgs", pkgs=["pkga", "pkgb", "pkgc"], test=True)
+            assert ret["result"] is None
+            assert ret["changes"] == expected
+
+
 @pytest.mark.parametrize("action", ["removed", "purged"])
 def test_removed_purged_with_changes_test_true(list_pkgs, action):
     """

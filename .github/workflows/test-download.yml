@@ -39,9 +39,6 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v3
 
-      - name: Setup Python Tools Scripts
-        uses: ./.github/actions/setup-python-tools-scripts
-
   dependencies:
     name: Setup Test Dependencies
     needs:
@@ -54,9 +51,6 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v3
-
-      - name: Setup Python Tools Scripts
-        uses: ./.github/actions/setup-python-tools-scripts
 
       - name: Define Nox Session
         run: |

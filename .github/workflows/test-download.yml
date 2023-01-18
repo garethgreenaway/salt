@@ -84,7 +84,7 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
-          nox --force-color -- --run-slow --package-tests
+          nox --force-color -- --run-slow --package-tests tests/pytests/packaging/
 
       - name: Set Exit Status
         if: always()

@@ -53,8 +53,6 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      matrix:
-        include: ${{ fromJSON(needs.generate-matrix.outputs.transport-matrix-include) }}
     steps:
       - name: Setup Python Tools Scripts
         uses: ./.github/actions/setup-python-tools-scripts

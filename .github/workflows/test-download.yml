@@ -84,7 +84,7 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
-          nox --force-color --package-tests
+          nox --force-color -- --run-slow --package-tests
 
       - name: Set Exit Status
         if: always()

@@ -48,7 +48,6 @@ jobs:
       - generate-matrix
     runs-on:
       - self-hosted
-      - ubuntu-latest
     timeout-minutes: 90
     strategy:
       fail-fast: false
@@ -68,7 +67,6 @@ jobs:
     name: Test
     runs-on:
       - self-hosted
-      - ubuntu-latest 
     timeout-minutes: 240  # 4 Hours - More than this and something is wrong
     needs:
       - dependencies

@@ -42,20 +42,6 @@ jobs:
       - name: Setup Python Tools Scripts
         uses: ./.github/actions/setup-python-tools-scripts
 
-      - name: Generate Test Matrix
-        id: generate-matrix
-        run: |
-          TEST_MATRIX=$(tools ci matrix ${{ inputs.distro-slug }})
-          echo "$TEST_MATRIX"
-          echo "matrix=$TEST_MATRIX" >> "$GITHUB_OUTPUT"
-
-      - name: Generate Transport Matrix
-        id: generate-transport-matrix
-        run: |
-          TRANSPORT_MATRIX=$(tools ci transport-matrix ${{ inputs.distro-slug }})
-          echo "$TRANSPORT_MATRIX"
-          echo "matrix=$TRANSPORT_MATRIX" >> "$GITHUB_OUTPUT"
-
   dependencies:
     name: Setup Test Dependencies
     needs:
@@ -70,13 +56,6 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.generate-matrix.outputs.transport-matrix-include) }}
     steps:
-      - name: Cache nox.${{ inputs.distro-slug }}.tar.* for session ${{ inputs.nox-session }}
-        id: nox-dependencies-cache
-        uses: actions/cache@v3
-        with:
-          path: nox.${{ inputs.distro-slug }}.tar.*
-          key: ${{ env.CACHE_SEED }}|testrun-deps|${{ inputs.distro-slug }}|${{ inputs.nox-session }}|${{ matrix.transport }}|${{ hashFiles('requirements/**/*.txt', 'cicd/golden-images.json') }}
-
       - name: Setup Python Tools Scripts
         uses: ./.github/actions/setup-python-tools-scripts
 
@@ -87,50 +66,6 @@ jobs:
           else
             echo NOX_SESSION=${{ inputs.nox-session }}-tcp >> "$GITHUB_ENV"
           fi
-
-      - name: Start VM
-        if: steps.nox-dependencies-cache.outputs.cache-hit != 'true'
-        id: spin-up-vm
-        run: |
-          tools --timestamps vm create --retries=2 ${{ inputs.distro-slug }}
-
-      - name: List Free Space
-        run: |
-          tools --timestamps vm ssh ${{ inputs.distro-slug }} -- df -h || true
-
-      - name: Install Dependencies
-        if: steps.nox-dependencies-cache.outputs.cache-hit != 'true'
-        run: |
-          tools --timestamps vm install-dependencies --nox-session=${{ env.NOX_SESSION }} ${{ inputs.distro-slug }}
-
-      - name: Compress .nox Directory
-        if: steps.nox-dependencies-cache.outputs.cache-hit != 'true'
-        run: |
-          tools --timestamps vm compress-dependencies ${{ inputs.distro-slug }}
-
-      - name: Download Compressed .nox Directory
-        if: steps.nox-dependencies-cache.outputs.cache-hit != 'true'
-        run: |
-          tools --timestamps vm download-dependencies ${{ inputs.distro-slug }}
-
-      - name: Destroy VM
-        if: always() && steps.nox-dependencies-cache.outputs.cache-hit != 'true'
-        run: |
-          tools --timestamps vm destroy ${{ inputs.distro-slug }}
-
-      - name: Set Exit Status
-        if: always()
-        run: |
-          python3 -c "import os; os.makedirs('exitstatus', exist_ok=True)"
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}-${{ inputs.distro-slug }}-deps
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: exitstatus
-          path: exitstatus
-          if-no-files-found: error
 
   test:
     name: Test
@@ -155,69 +90,6 @@ jobs:
           else
             echo NOX_SESSION=${{ inputs.nox-session }}-tcp >> "$GITHUB_ENV"
           fi
-
-      - name: Start VM
-        id: spin-up-vm
-        env:
-          TESTS_CHUNK: ${{ matrix.tests-chunk }}
-        run: |
-          tools --timestamps vm create --retries=2 ${{ inputs.distro-slug }}
-
-      - name: List Free Space
-        run: |
-          tools --timestamps vm ssh ${{ inputs.distro-slug }} -- df -h || true
-
-      - name: Upload Checkout To VM
-        run: |
-          tools --timestamps vm rsync ${{ inputs.distro-slug }}
-
-      - name: Decompress .nox Directory
-        run: |
-          tools --timestamps vm decompress-dependencies ${{ inputs.distro-slug }}
-
-      - name: Show System Info & Test Plan
-        run: |
-          tools --timestamps --no-output-timeout-secs=18000 vm testplan --skip-requirements-install \
-            --nox-session=${{ env.NOX_SESSION }} ${{ inputs.distro-slug }} \
-            ${{ matrix.tests-chunk }}
-
-      - name: Run Download and Install Tests
-        id: run-slow-changed-tests
-        if: ${{ fromJSON(inputs.testrun)['type'] != 'full' }}
-        run: |
-          tools --timestamps --no-output-timeout-secs=18000 vm test --skip-requirements-install \
-            --nox-session=${{ env.NOX_SESSION }} --rerun-failures ${{ inputs.distro-slug }} \
-            ${{ matrix.tests-chunk }} -- --package-tests --suppress-no-test-exit-code \
-            --from-filenames=testrun-changed-files.txt
-
-      - name: Combine Coverage Reports
-        if: always() && steps.spin-up-vm.outcome == 'success'
-        run: |
-          tools --timestamps vm combine-coverage ${{ inputs.distro-slug }}
-
-      - name: Download Test Run Artifacts
-        id: download-artifacts-from-vm
-        if: always() && steps.spin-up-vm.outcome == 'success'
-        run: |
-          tools --timestamps vm download-artifacts ${{ inputs.distro-slug }}
-          tree -a artifacts
-          mv artifacts/coverage/.coverage artifacts/coverage/.coverage.${{ inputs.distro-slug }}.${{ env.NOX_SESSION }}.${{ matrix.tests-chunk }}
-          echo "COVERAGE_FILE=artifacts/coverage/.coverage.${{ inputs.distro-slug }}.${{ env.NOX_SESSION }}.${{ matrix.tests-chunk }}" >> GITHUB_ENV
-
-      - name: Destroy VM
-        if: always()
-        run: |
-          tools --timestamps vm destroy ${{ inputs.distro-slug }} || true
-
-      - name: Upload Test Run Artifacts
-        if: always() && steps.download-artifacts-from-vm.outcome == 'success'
-        uses: actions/upload-artifact@v3
-        with:
-          name: testrun-artifacts-${{ inputs.distro-slug }}-${{ env.NOX_SESSION }}
-          path: |
-            artifacts
-            !artifacts/salt/*
-            !artifacts/salt-*.tar.*
 
       - name: Report Salt Code Coverage(${{ matrix.tests-chunk }})
         if: always() && steps.download-artifacts-from-vm.outcome == 'success'

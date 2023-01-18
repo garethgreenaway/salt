@@ -80,94 +80,17 @@ jobs:
             echo NOX_SESSION=${{ inputs.nox-session }}-tcp >> "$GITHUB_ENV"
           fi
 
-      - name: Report Salt Code Coverage(${{ matrix.tests-chunk }})
-        if: always() && steps.download-artifacts-from-vm.outcome == 'success'
+      - name: Run Package Download and Install Tests
+        if: always()
         continue-on-error: true
         run: |
-          nox --force-color -e report-coverage -- salt
-
-      - name: Report Tests Code Coverage(${{ matrix.tests-chunk }})
-        if: always() && steps.download-artifacts-from-vm.outcome == 'success'
-        continue-on-error: true
-        run: |
-          nox --force-color -e report-coverage -- tests
-
-      - name: Report Combined Code Coverage(${{ matrix.tests-chunk }})
-        if: always() && steps.download-artifacts-from-vm.outcome == 'success'
-        continue-on-error: true
-        run: |
-          nox --force-color -e report-coverage
+          nox --force-color --package-tests
 
       - name: Set Exit Status
         if: always()
         run: |
           python3 -c "import os; os.makedirs('exitstatus', exist_ok=True)"
           echo "${{ job.status }}" > exitstatus/${{ github.job }}-${{ inputs.distro-slug }}-${{ env.NOX_SESSION }}-${{ matrix.tests-chunk }}-tests
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: exitstatus
-          path: exitstatus
-          if-no-files-found: error
-
-  report:
-    name: Reports for ${{ inputs.distro-slug }}(${{ matrix.transport }})
-    runs-on: ubuntu-latest
-    if: always() && needs.test.result != 'cancelled' && needs.test.result != 'skipped'
-    needs:
-      - test
-      - generate-matrix
-    strategy:
-      fail-fast: false
-
-    steps:
-      - name: Define Nox Session
-        run: |
-          if [ "${{ matrix.transport }}" != "tcp" ]; then
-            echo NOX_SESSION=${{ inputs.nox-session }} >> "$GITHUB_ENV"
-          else
-            echo NOX_SESSION=${{ inputs.nox-session }}-tcp >> "$GITHUB_ENV"
-          fi
-
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.9"
-
-      - name: Install Nox
-        run: |
-          python3 -m pip install 'nox==${{ env.NOX_VERSION }}'
-
-      - name: Report Salt Code Coverage
-        continue-on-error: true
-        run: |
-          nox --force-color -e report-coverage -- salt
-
-      - name: Report Tests Code Coverage
-        continue-on-error: true
-        run: |
-          nox --force-color -e report-coverage -- tests
-
-      - name: Report Combined Code Coverage
-        continue-on-error: true
-        run: |
-          nox --force-color -e report-coverage
-
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v3
-        # always run even if the previous steps fails
-        if: always() && github.event_name == 'push' && steps.download-test-run-artifacts.outcome == 'success'
-        with:
-          check_name: Overall Test Results(${{ inputs.distro-slug }})
-          report_paths: 'artifacts/xml-unittests-output/*.xml'
-
-      - name: Set Exit Status
-        if: always()
-        run: |
-          python3 -c "import os; os.makedirs('exitstatus', exist_ok=True)"
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}-${{ inputs.distro-slug }}-${{ env.NOX_SESSION }}-report
 
       - name: Upload Exit Status
         if: always()

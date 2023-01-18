@@ -1,34 +1,25 @@
 name: Test Package Download and Install
 
 on:
-  workflow_call:
+  push: {}
+  pull_request: {}
+  workflow_dispatch:
     inputs:
-      distro-slug:
+      salt-version:
+        type: string
+        default: ""
+        description: >
+          The Salt version to set prior to running tests or building packages.
+          If not set, it is discover at run time, like, for example, capturing
+          the output of running `python3 salt/version.py`
+      testrun-type:
+        description: Type of test run
         required: true
-        type: string
-        description: The OS slug to run tests against
-      nox-session:
-        required: true
-        type: string
-        description: The nox session to run
-      testrun:
-        required: true
-        type: string
-        description: JSON string containing information about what and how to run the test suite
-      platform:
-        required: true
-        type: string
-        description: The platform being tested
-      arch:
-        required: true
-        type: string
-        description: The platform arch being tested
-      package-name:
-        required: false
-        type: string
-        description: The onedir package name to use
-        default: salt
-
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - changed
 
 env:
   NOX_VERSION: "2022.8.7"

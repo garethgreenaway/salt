@@ -36,6 +36,9 @@ jobs:
       matrix-include: ${{ steps.generate-matrix.outputs.matrix }}
       transport-matrix-include: ${{ steps.generate-transport-matrix.outputs.matrix }}
     steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+
       - name: Setup Python Tools Scripts
         uses: ./.github/actions/setup-python-tools-scripts
 

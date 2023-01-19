@@ -1,0 +1,8 @@
+name: Test One
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test_two:
+    uses: garethgreenaway/salt/.github/workflows/test-two.yml@main

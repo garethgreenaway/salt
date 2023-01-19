@@ -1,0 +1,70 @@
+name: Test Two
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  NOX_VERSION: "2022.8.7"
+  COLUMNS: 160
+  AWS_MAX_ATTEMPTS: "10"
+  AWS_RETRY_MODE: "adaptive"
+
+jobs:
+
+  generate-matrix:
+    name: Generate Test Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix-include: ${{ steps.generate-matrix.outputs.matrix }}
+      transport-matrix-include: ${{ steps.generate-transport-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+
+  dependencies:
+    name: Setup Test Dependencies
+    needs:
+      - generate-matrix
+    runs-on:
+      - self-hosted
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+
+      - name: Define Nox Session
+        run: |
+          if [ "${{ matrix.transport }}" != "tcp" ]; then
+            echo NOX_SESSION=${{ inputs.nox-session }} >> "$GITHUB_ENV"
+          else
+            echo NOX_SESSION=${{ inputs.nox-session }}-tcp >> "$GITHUB_ENV"
+          fi
+
+  test:
+    name: Test
+    runs-on:
+      - self-hosted
+    timeout-minutes: 240  # 4 Hours - More than this and something is wrong
+    needs:
+      - dependencies
+      - generate-matrix
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Define Nox Session
+        run: |
+          if [ "${{ matrix.transport }}" != "tcp" ]; then
+            echo NOX_SESSION=${{ inputs.nox-session }} >> "$GITHUB_ENV"
+          else
+            echo NOX_SESSION=${{ inputs.nox-session }}-tcp >> "$GITHUB_ENV"
+          fi
+
+      - name: Run Package Download and Install Tests
+        if: always()
+        continue-on-error: true
+        run: |
+          nox --force-color -e 'pytest-3(coverage=False)' -- --run-slow --package-tests tests/pytests/unit/modules/

@@ -14,14 +14,14 @@ jobs:
 
   step_one:
     name: Step One 
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Echo Step
         run: echo "Test Two Step One"
 
   step_two:
     name: Step Two
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - step_one
     steps:
@@ -30,7 +30,7 @@ jobs:
 
   step_three:
     name: Step Three
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - step_one
       - step_two

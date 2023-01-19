@@ -5,4 +5,4 @@ on:
 
 jobs:
   test_two:
-    uses: test-two.yml
+    uses: test-two.yml@hotfix/salt-pkg-tests

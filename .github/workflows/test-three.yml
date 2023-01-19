@@ -1,4 +1,4 @@
-name: Test Two
+name: Test Three
 
 on:
   workflow_dispatch:
@@ -17,21 +17,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Echo Step
-        run: echo "Test Two Step One"
+        run: echo "Test Three Step One"
 
   step_two:
     name: Step Two
     runs-on: ubuntu-latest
     steps:
       - name: Echo Step
-        run: echo "Test Two Step Two"
+        run: echo "Test Three Step Two"
 
   step_three:
     name: Step Three
     runs-on: ubuntu-latest
     steps:
       - name: Echo Step
-        run: echo "Test Two Step Three"
-
-  step_four:
-    uses: garethgreenaway/salt/.github/workflows/test-three.yml@hotfix/salt-pkg-tests
+        run: echo "Test Three Step Three"

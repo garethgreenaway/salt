@@ -5,4 +5,4 @@ on:
 
 jobs:
   test_two:
-    uses: .github/workflows/test-two.yml@hotfix/salt-pkg-tests
+    uses: garethgreenaway/salt/.github/workflows/test-two.yml@hotfix/salt-pkg-tests

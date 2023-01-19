@@ -22,6 +22,8 @@ jobs:
   step_two:
     name: Step Two
     runs-on: ubuntu-latest
+    needs:
+      - step_one
     steps:
       - name: Echo Step
         run: echo "Test Three Step Two"
@@ -29,6 +31,9 @@ jobs:
   step_three:
     name: Step Three
     runs-on: ubuntu-latest
+    needs:
+      - step_one
+      - step_two
     steps:
       - name: Echo Step
         run: echo "Test Three Step Three"

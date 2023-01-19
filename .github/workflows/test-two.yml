@@ -22,6 +22,8 @@ jobs:
   step_two:
     name: Step Two
     runs-on: ubuntu-latest
+    needs:
+      - step_one
     steps:
       - name: Echo Step
         run: echo "Test Two Step Two"
@@ -29,9 +31,17 @@ jobs:
   step_three:
     name: Step Three
     runs-on: ubuntu-latest
+    needs:
+      - step_one
+      - step_two
     steps:
       - name: Echo Step
         run: echo "Test Two Step Three"
 
   step_four:
+    name: Step Four
+    needs:
+      - step_one
+      - step_two
+      - step_three
     uses: garethgreenaway/salt/.github/workflows/test-three.yml@hotfix/salt-pkg-tests
